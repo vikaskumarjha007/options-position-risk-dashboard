@@ -1,0 +1,3 @@
+underlying,type,strike,expiry,qty_lots,lot_size,entry_price,side,iv,ltp
+ACMEIND,CE,1500,2026-11-24,2,500,46.50,BUY,,48.15
+ACMEIND,PE,1500,2026-11-24,2,500,45.20,BUY,,44.00

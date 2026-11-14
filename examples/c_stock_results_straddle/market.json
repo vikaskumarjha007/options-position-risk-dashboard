@@ -1,0 +1,11 @@
+{
+  "notes": "SYNTHETIC snapshot. ACMEIND is a fictional stock. IV is solved from the supplied option prices. Lot size 500, expiry and results date are illustrative only.",
+  "valuation_date": "2026-11-16",
+  "risk_free_rate": 0.065,
+  "india_vix": 15.1,
+  "underlyings": {
+    "ACMEIND": {"spot": 1502.0, "dividend_yield": 0.0, "kind": "stock"}
+  },
+  "event": {"name": "Q2 results (fictional)", "underlying": "ACMEIND", "date": "2026-11-18",
+            "iv_crush_pts": 20, "days_forward": 3}
+}

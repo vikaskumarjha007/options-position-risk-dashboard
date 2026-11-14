@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Options position risk dashboard</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#16202a;--muted:#5b6673;--line:#dde2e8;--accent:#1f5fbf;
+--warn:#b45309;--warnbg:#fff7e6;--ok:#15803d;--okbg:#ecfdf3;--info:#1f5fbf;--infobg:#eef4ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
+font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 10px}h3{font-size:14px;margin:14px 0 6px}
+.sub{color:var(--muted);margin:0 0 12px}.disc{font-size:12px;color:var(--muted);border:1px dashed var(--line);
+padding:8px 10px;border-radius:6px;background:var(--card)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.card .k{font-size:12px;color:var(--muted)}.card .v{font-size:20px;font-weight:600;margin-top:2px}
+.card .s{font-size:12px;color:var(--muted)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:5px 8px;border-bottom:1px solid var(--line);
+text-align:right;white-space:nowrap}th{color:var(--muted);font-weight:600}td.l,th.l{text-align:left}
+.heat td{border:1px solid #fff}.heat th.corner{text-align:left}
+.warn{list-style:none;padding:0;margin:0}.warn li{padding:7px 10px;border-radius:6px;margin-bottom:6px}
+.warn .warn-l{background:var(--warnbg);border-left:4px solid var(--warn)}
+.warn .ok-l{background:var(--okbg);border-left:4px solid var(--ok)}
+.warn .info-l{background:var(--infobg);border-left:4px solid var(--info)}
+.tag{font-weight:600;margin-right:6px}
+svg.chart{width:100%;height:auto;display:block}
+.zone-profit{fill:rgba(22,140,74,.06)}.zone-loss{fill:rgba(205,44,44,.06)}
+.grid{stroke:#e8ecf0;stroke-width:1}.zero{stroke:#7a8794;stroke-width:1.2}
+.spot{stroke:#8a6d00;stroke-width:1.2;stroke-dasharray:3 3}.spot-label{fill:#8a6d00}
+.line-exp{fill:none;stroke:var(--accent);stroke-width:2.4}
+.line-t0{fill:none;stroke:#7a8794;stroke-width:1.6;stroke-dasharray:6 4}
+.be{fill:#fff;stroke:var(--ink);stroke-width:1.5}.be-label{font-size:11px;fill:var(--ink);font-weight:600}
+.tick{font-size:11px;fill:var(--muted)}.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.sw{display:inline-block;width:18px;height:0;border-top:3px solid var(--accent);vertical-align:middle;margin-right:4px}
+.sw.t0{border-top:2px dashed #7a8794}.pos{color:var(--ok)}.neg{color:#b42318}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:760px){.two{grid-template-columns:1fr}}
+footer{margin-top:28px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Options position risk dashboard</h1>
+<p class="sub">Valuation 2026-11-16 · NIFTY 24,510.00 · India VIX 13.4 (Normal regime, illustrative bands) · r = 6.50%</p>
+<p class="disc">Synthetic, fictional positions and market data for demonstration only. Lot sizes, expiries and margin parameters are illustrative. Not investment advice and not the author&#x27;s trading results.</p>
+<h2>Book summary</h2><div class="cards">
+<div class="card"><div class="k">Net delta · NIFTY</div><div class="v pos">+0.13 lots</div><div class="s">+9.5 units · ₹2,32,755 notional</div></div>
+<div class="card"><div class="k">Gamma P&amp;L, 1% move</div><div class="v neg">−₹12,369</div><div class="s">½·Γ·(1% of spot)², summed</div></div>
+<div class="card"><div class="k">Vega</div><div class="v neg">−₹7,231</div><div class="s">per +1 vol point</div></div>
+<div class="card"><div class="k">Theta</div><div class="v pos">₹6,278</div><div class="s">per calendar day</div></div>
+<div class="card"><div class="k">Rho</div><div class="v neg">−₹345</div><div class="s">per +1% rate</div></div>
+<div class="card"><div class="k">Mark-to-model P&amp;L</div><div class="v pos">₹4,177</div><div class="s">vs entry prices</div></div>
+<div class="card"><div class="k">Net premium</div><div class="v pos">₹32,850</div><div class="s">received (+) / paid (−)</div></div>
+<div class="card"><div class="k">Rough margin*</div><div class="v ">₹9,01,729</div><div class="s">approximation, not SPAN</div></div>
+</div>
+<h2>Warnings &amp; checks</h2><ul class="warn">
+<li class="ok-l"><span class="tag">Delta</span>NIFTY: |delta| 0.13 lots-equiv within threshold 0.50.</li>
+<li class="warn-l"><span class="tag">Tail risk</span>NIFTY: undefined-risk profile - expiry loss keeps growing beyond the ±6% range shown (−₹4,15,590 at the edge).</li>
+<li class="info-l"><span class="tag">Regime</span>India VIX 13.4 → Normal regime. Typical regime: standard sizing and strike distances.</li>
+<li class="info-l"><span class="tag">Scenarios</span>Worst grid scenario −₹3,48,398; best ₹51,594 (spot ±5%, IV ±10 pts, up to 3 days).</li>
+</ul>
+<h2>Delta re-hedge suggestion</h2><div class="panel"><table><tr><th class="l">Underlying</th><th>Net delta (units)</th><th>Exact lots</th><th class="l">Suggested futures trade</th><th>Residual delta (units)</th><th>Residual (lots)</th><th>Residual notional</th><th class="l">Threshold check</th></tr>
+<tr><td class="l">NIFTY</td><td>+9.5</td><td>-0.13</td><td class="l"><b>No trade</b></td><td>+9.5</td><td>+0.13</td><td>₹2,32,755</td><td class="l">within ±0.50 lots</td></tr>
+</table><p class="legend">Rounded to whole lots (halves away from zero); futures delta per unit = e^{(r−q)T} of the nearest expiry.</p></div>
+<h2>Payoff</h2>
+<div class="panel"><h3>NIFTY · nearest expiry 2026-11-24 (8 day(s))</h3>
+<svg class="chart" viewBox="0 0 760 320" role="img" aria-label="NIFTY payoff at expiry">
+<rect x="78" y="16" width="664" height="49.0" class="zone-profit"/>
+<rect x="78" y="65.0" width="664" height="213.0" class="zone-loss"/>
+<line x1="78" x2="742" y1="252.6" y2="252.6" class="grid"/>
+<text x="72" y="256.6" class="tick" text-anchor="end">−₹4.0L</text>
+<line x1="78" x2="742" y1="158.8" y2="158.8" class="grid"/>
+<text x="72" y="162.8" class="tick" text-anchor="end">−₹2.0L</text>
+<line x1="78" x2="742" y1="65.0" y2="65.0" class="grid"/>
+<text x="72" y="69.0" class="tick" text-anchor="end">₹0</text>
+<text x="78.0" y="294" class="tick" text-anchor="middle">23,039</text>
+<text x="210.8" y="294" class="tick" text-anchor="middle">23,628</text>
+<text x="343.6" y="294" class="tick" text-anchor="middle">24,216</text>
+<text x="476.4" y="294" class="tick" text-anchor="middle">24,804</text>
+<text x="609.2" y="294" class="tick" text-anchor="middle">25,392</text>
+<text x="742.0" y="294" class="tick" text-anchor="middle">25,981</text>
+<line x1="78" x2="742" y1="65.0" y2="65.0" class="zero"/>
+<line x1="410.0" x2="410.0" y1="16" y2="278" class="spot"/>
+<text x="410.0" y="310" class="tick spot-label" text-anchor="middle">spot 24,510</text>
+<path d="M78.0,256.6 L82.1,252.4 L86.3,248.2 L90.5,244.0 L94.6,239.9 L98.7,235.7 L102.9,231.6 L107.1,227.5 L111.2,223.5 L115.3,219.5 L119.5,215.5 L123.7,211.5 L127.8,207.6 L131.9,203.7 L136.1,199.9 L140.3,196.0 L144.4,192.3 L148.5,188.5 L152.7,184.8 L156.9,181.2 L161.0,177.6 L165.1,174.0 L169.3,170.5 L173.5,167.0 L177.6,163.5 L181.7,160.2 L185.9,156.8 L190.1,153.6 L194.2,150.3 L198.3,147.1 L202.5,144.0 L206.7,140.9 L210.8,137.9 L214.9,135.0 L219.1,132.1 L223.3,129.2 L227.4,126.4 L231.5,123.7 L235.7,121.0 L239.9,118.4 L244.0,115.8 L248.1,113.3 L252.3,110.9 L256.5,108.5 L260.6,106.2 L264.7,103.9 L268.9,101.7 L273.1,99.6 L277.2,97.5 L281.3,95.5 L285.5,93.5 L289.7,91.6 L293.8,89.8 L297.9,88.0 L302.1,86.3 L306.3,84.7 L310.4,83.1 L314.5,81.5 L318.7,80.0 L322.9,78.6 L327.0,77.3 L331.1,76.0 L335.3,74.7 L339.5,73.6 L343.6,72.5 L347.7,71.4 L351.9,70.4 L356.1,69.5 L360.2,68.6 L364.3,67.8 L368.5,67.1 L372.7,66.4 L376.8,65.7 L380.9,65.2 L385.1,64.7 L389.3,64.3 L393.4,63.9 L397.5,63.6 L401.7,63.3 L405.9,63.1 L410.0,63.0 L414.1,63.0 L418.3,63.0 L422.5,63.1 L426.6,63.2 L430.7,63.4 L434.9,63.7 L439.1,64.1 L443.2,64.5 L447.3,65.0 L451.5,65.5 L455.7,66.2 L459.8,66.8 L463.9,67.6 L468.1,68.4 L472.3,69.3 L476.4,70.3 L480.5,71.3 L484.7,72.4 L488.9,73.6 L493.0,74.8 L497.1,76.1 L501.3,77.4 L505.5,78.9 L509.6,80.4 L513.7,81.9 L517.9,83.5 L522.1,85.2 L526.2,86.9 L530.3,88.7 L534.5,90.6 L538.7,92.5 L542.8,94.5 L546.9,96.5 L551.1,98.6 L555.3,100.7 L559.4,102.9 L563.5,105.1 L567.7,107.4 L571.9,109.7 L576.0,112.1 L580.1,114.5 L584.3,117.0 L588.5,119.5 L592.6,122.0 L596.7,124.6 L600.9,127.2 L605.1,129.9 L609.2,132.6 L613.3,135.3 L617.5,138.0 L621.7,140.8 L625.8,143.6 L629.9,146.5 L634.1,149.3 L638.3,152.2 L642.4,155.1 L646.5,158.1 L650.7,161.0 L654.9,164.0 L659.0,167.0 L663.1,170.0 L667.3,173.0 L671.5,176.1 L675.6,179.1 L679.7,182.2 L683.9,185.3 L688.1,188.4 L692.2,191.5 L696.3,194.6 L700.5,197.7 L704.7,200.8 L708.8,204.0 L712.9,207.1 L717.1,210.3 L721.3,213.5 L725.4,216.6 L729.5,219.8 L733.7,223.0 L737.9,226.2 L742.0,229.4" class="line-t0"/>
+<path d="M78.0,259.9 L82.1,255.4 L86.3,250.9 L90.5,246.4 L94.6,241.8 L98.7,237.3 L102.9,232.8 L107.1,228.2 L111.2,223.7 L115.3,219.2 L119.5,214.7 L123.7,210.1 L127.8,205.6 L131.9,201.1 L136.1,196.6 L140.3,192.0 L144.4,187.5 L148.5,183.0 L152.7,178.4 L156.9,173.9 L161.0,169.4 L165.1,164.9 L169.3,160.3 L173.5,155.8 L177.6,151.3 L181.7,146.8 L185.9,142.2 L190.1,137.7 L194.2,133.2 L198.3,128.7 L202.5,124.1 L206.7,119.6 L210.8,115.1 L214.9,110.5 L219.1,106.0 L223.3,101.5 L227.4,97.0 L231.5,92.4 L235.7,87.9 L239.9,83.4 L244.0,78.9 L248.1,74.3 L252.3,72.2 L256.5,71.6 L260.6,70.9 L264.7,70.3 L268.9,69.6 L273.1,69.0 L277.2,68.3 L281.3,67.7 L285.5,67.1 L289.7,66.4 L293.8,65.8 L297.9,65.1 L302.1,64.5 L306.3,63.8 L310.4,63.2 L314.5,62.5 L318.7,61.9 L322.9,61.2 L327.0,60.6 L331.1,59.9 L335.3,59.3 L339.5,58.6 L343.6,58.0 L347.7,57.3 L351.9,56.7 L356.1,56.1 L360.2,55.4 L364.3,54.8 L368.5,54.1 L372.7,53.5 L376.8,52.8 L380.9,52.2 L385.1,51.5 L389.3,50.9 L393.4,50.2 L397.5,49.6 L401.7,48.9 L405.9,48.3 L410.0,47.6 L414.1,47.0 L418.3,46.4 L422.5,45.7 L426.6,45.1 L430.7,44.4 L434.9,43.8 L439.1,43.1 L443.2,42.5 L447.3,41.8 L451.5,41.2 L455.7,40.5 L459.8,39.9 L463.9,39.2 L468.1,38.6 L472.3,37.9 L476.4,37.3 L480.5,36.7 L484.7,36.0 L488.9,35.4 L493.0,34.7 L497.1,34.1 L501.3,36.5 L505.5,39.7 L509.6,42.9 L513.7,46.2 L517.9,49.4 L522.1,52.6 L526.2,55.9 L530.3,59.1 L534.5,62.3 L538.7,65.6 L542.8,68.8 L546.9,72.0 L551.1,75.3 L555.3,78.5 L559.4,81.7 L563.5,85.0 L567.7,88.2 L571.9,91.4 L576.0,94.7 L580.1,97.9 L584.3,101.1 L588.5,104.4 L592.6,107.6 L596.7,110.8 L600.9,114.1 L605.1,117.3 L609.2,120.5 L613.3,123.8 L617.5,127.0 L621.7,130.2 L625.8,133.5 L629.9,136.7 L634.1,139.9 L638.3,143.2 L642.4,146.4 L646.5,149.6 L650.7,152.9 L654.9,156.1 L659.0,159.3 L663.1,162.6 L667.3,165.8 L671.5,169.0 L675.6,172.3 L679.7,175.5 L683.9,178.7 L688.1,182.0 L692.2,185.2 L696.3,188.4 L700.5,191.7 L704.7,194.9 L708.8,198.1 L712.9,201.4 L717.1,204.6 L721.3,207.8 L725.4,211.1 L729.5,214.3 L733.7,217.5 L737.9,220.8 L742.0,224.0" class="line-exp"/>
+<circle cx="298.7" cy="65.0" r="4.5" class="be"/>
+<text x="298.7" y="55.0" class="be-label" text-anchor="middle">BE 24,017</text>
+<circle cx="537.9" cy="65.0" r="4.5" class="be"/>
+<text x="537.9" y="85.0" class="be-label" text-anchor="middle">BE 25,077</text>
+</svg>
+<p class="legend"><span class="sw"></span>P&amp;L at expiry vs entry &nbsp; <span class="sw t0"></span>P&amp;L today (model) &nbsp; · Breakevens: <b>24,017, 25,077</b> · Max profit in range ₹65,927 · Max loss in range −₹4,15,590</p></div>
+<h2>Scenario P&amp;L (vs current mark)</h2><p class="sub">Rows: parallel IV shift (vol pts). Columns: spot move applied to every underlying. Colour scale shared across tables.</p>
+<div class="panel" style="margin-bottom:10px"><h3>T + 0 day(s)</h3><table class="heat"><tr><th class="corner">IV \ spot</th>
+<th>-5%</th>
+<th>-4%</th>
+<th>-3%</th>
+<th>-2%</th>
+<th>-1%</th>
+<th>+0%</th>
+<th>+1%</th>
+<th>+2%</th>
+<th>+3%</th>
+<th>+4%</th>
+<th>+5%</th>
+</tr>
+<tr><th class="l">-10 pts</th>
+<td style="background:rgba(205,44,44,0.60)">−₹2.8L</td>
+<td style="background:rgba(205,44,44,0.38)">−₹1.5L</td>
+<td style="background:rgba(205,44,44,0.20)">−₹49k</td>
+<td style="background:rgba(205,44,44,0.13)">−₹4k</td>
+<td style="background:rgba(22,140,74,0.15)">₹17k</td>
+<td style="background:rgba(22,140,74,0.18)">₹35k</td>
+<td style="background:rgba(22,140,74,0.21)">₹50k</td>
+<td style="background:rgba(22,140,74,0.14)">₹11k</td>
+<td style="background:rgba(205,44,44,0.25)">−₹78k</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.57)">−₹2.6L</td>
+</tr>
+<tr><th class="l">-5 pts</th>
+<td style="background:rgba(205,44,44,0.60)">−₹2.8L</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.26)">−₹80k</td>
+<td style="background:rgba(205,44,44,0.16)">−₹23k</td>
+<td style="background:rgba(22,140,74,0.14)">₹11k</td>
+<td style="background:rgba(22,140,74,0.17)">₹28k</td>
+<td style="background:rgba(22,140,74,0.16)">₹24k</td>
+<td style="background:rgba(205,44,44,0.14)">−₹14k</td>
+<td style="background:rgba(205,44,44,0.27)">−₹84k</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.57)">−₹2.6L</td>
+</tr>
+<tr><th class="l">+0 pts</th>
+<td style="background:rgba(205,44,44,0.63)">−₹3.0L</td>
+<td style="background:rgba(205,44,44,0.46)">−₹2.0L</td>
+<td style="background:rgba(205,44,44,0.31)">−₹1.1L</td>
+<td style="background:rgba(205,44,44,0.21)">−₹52k</td>
+<td style="background:rgba(205,44,44,0.14)">−₹14k</td>
+<td style="background:rgba(22,140,74,0.12)">₹0</td>
+<td style="background:rgba(205,44,44,0.14)">−₹10k</td>
+<td style="background:rgba(205,44,44,0.20)">−₹46k</td>
+<td style="background:rgba(205,44,44,0.30)">−₹1.0L</td>
+<td style="background:rgba(205,44,44,0.43)">−₹1.8L</td>
+<td style="background:rgba(205,44,44,0.58)">−₹2.6L</td>
+</tr>
+<tr><th class="l">+5 pts</th>
+<td style="background:rgba(205,44,44,0.67)">−₹3.2L</td>
+<td style="background:rgba(205,44,44,0.51)">−₹2.3L</td>
+<td style="background:rgba(205,44,44,0.38)">−₹1.5L</td>
+<td style="background:rgba(205,44,44,0.28)">−₹91k</td>
+<td style="background:rgba(205,44,44,0.21)">−₹55k</td>
+<td style="background:rgba(205,44,44,0.19)">−₹42k</td>
+<td style="background:rgba(205,44,44,0.21)">−₹51k</td>
+<td style="background:rgba(205,44,44,0.26)">−₹83k</td>
+<td style="background:rgba(205,44,44,0.35)">−₹1.3L</td>
+<td style="background:rgba(205,44,44,0.46)">−₹2.0L</td>
+<td style="background:rgba(205,44,44,0.60)">−₹2.8L</td>
+</tr>
+<tr><th class="l">+10 pts</th>
+<td style="background:rgba(205,44,44,0.72)">−₹3.5L</td>
+<td style="background:rgba(205,44,44,0.57)">−₹2.6L</td>
+<td style="background:rgba(205,44,44,0.45)">−₹1.9L</td>
+<td style="background:rgba(205,44,44,0.36)">−₹1.4L</td>
+<td style="background:rgba(205,44,44,0.30)">−₹1.0L</td>
+<td style="background:rgba(205,44,44,0.28)">−₹92k</td>
+<td style="background:rgba(205,44,44,0.29)">−₹99k</td>
+<td style="background:rgba(205,44,44,0.34)">−₹1.3L</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.51)">−₹2.3L</td>
+<td style="background:rgba(205,44,44,0.63)">−₹3.0L</td>
+</tr>
+</table></div>
+<div class="panel" style="margin-bottom:10px"><h3>T + 1 day(s)</h3><table class="heat"><tr><th class="corner">IV \ spot</th>
+<th>-5%</th>
+<th>-4%</th>
+<th>-3%</th>
+<th>-2%</th>
+<th>-1%</th>
+<th>+0%</th>
+<th>+1%</th>
+<th>+2%</th>
+<th>+3%</th>
+<th>+4%</th>
+<th>+5%</th>
+</tr>
+<tr><th class="l">-10 pts</th>
+<td style="background:rgba(205,44,44,0.60)">−₹2.8L</td>
+<td style="background:rgba(205,44,44,0.38)">−₹1.5L</td>
+<td style="background:rgba(205,44,44,0.20)">−₹48k</td>
+<td style="background:rgba(205,44,44,0.13)">−₹4k</td>
+<td style="background:rgba(22,140,74,0.15)">₹16k</td>
+<td style="background:rgba(22,140,74,0.18)">₹35k</td>
+<td style="background:rgba(22,140,74,0.21)">₹51k</td>
+<td style="background:rgba(22,140,74,0.14)">₹13k</td>
+<td style="background:rgba(205,44,44,0.25)">−₹77k</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.57)">−₹2.6L</td>
+</tr>
+<tr><th class="l">-5 pts</th>
+<td style="background:rgba(205,44,44,0.61)">−₹2.8L</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.25)">−₹78k</td>
+<td style="background:rgba(205,44,44,0.16)">−₹20k</td>
+<td style="background:rgba(22,140,74,0.14)">₹12k</td>
+<td style="background:rgba(22,140,74,0.17)">₹29k</td>
+<td style="background:rgba(22,140,74,0.17)">₹27k</td>
+<td style="background:rgba(205,44,44,0.14)">−₹10k</td>
+<td style="background:rgba(205,44,44,0.26)">−₹82k</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.57)">−₹2.6L</td>
+</tr>
+<tr><th class="l">+0 pts</th>
+<td style="background:rgba(205,44,44,0.63)">−₹3.0L</td>
+<td style="background:rgba(205,44,44,0.45)">−₹1.9L</td>
+<td style="background:rgba(205,44,44,0.30)">−₹1.1L</td>
+<td style="background:rgba(205,44,44,0.20)">−₹47k</td>
+<td style="background:rgba(205,44,44,0.14)">−₹9k</td>
+<td style="background:rgba(22,140,74,0.13)">₹6k</td>
+<td style="background:rgba(205,44,44,0.13)">−₹4k</td>
+<td style="background:rgba(205,44,44,0.19)">−₹40k</td>
+<td style="background:rgba(205,44,44,0.29)">−₹100k</td>
+<td style="background:rgba(205,44,44,0.42)">−₹1.8L</td>
+<td style="background:rgba(205,44,44,0.57)">−₹2.6L</td>
+</tr>
+<tr><th class="l">+5 pts</th>
+<td style="background:rgba(205,44,44,0.66)">−₹3.2L</td>
+<td style="background:rgba(205,44,44,0.50)">−₹2.2L</td>
+<td style="background:rgba(205,44,44,0.36)">−₹1.4L</td>
+<td style="background:rgba(205,44,44,0.26)">−₹81k</td>
+<td style="background:rgba(205,44,44,0.20)">−₹45k</td>
+<td style="background:rgba(205,44,44,0.17)">−₹31k</td>
+<td style="background:rgba(205,44,44,0.19)">−₹41k</td>
+<td style="background:rgba(205,44,44,0.25)">−₹73k</td>
+<td style="background:rgba(205,44,44,0.34)">−₹1.3L</td>
+<td style="background:rgba(205,44,44,0.45)">−₹1.9L</td>
+<td style="background:rgba(205,44,44,0.59)">−₹2.7L</td>
+</tr>
+<tr><th class="l">+10 pts</th>
+<td style="background:rgba(205,44,44,0.71)">−₹3.4L</td>
+<td style="background:rgba(205,44,44,0.55)">−₹2.5L</td>
+<td style="background:rgba(205,44,44,0.43)">−₹1.8L</td>
+<td style="background:rgba(205,44,44,0.33)">−₹1.2L</td>
+<td style="background:rgba(205,44,44,0.27)">−₹89k</td>
+<td style="background:rgba(205,44,44,0.25)">−₹76k</td>
+<td style="background:rgba(205,44,44,0.26)">−₹84k</td>
+<td style="background:rgba(205,44,44,0.31)">−₹1.1L</td>
+<td style="background:rgba(205,44,44,0.39)">−₹1.6L</td>
+<td style="background:rgba(205,44,44,0.49)">−₹2.2L</td>
+<td style="background:rgba(205,44,44,0.62)">−₹2.9L</td>
+</tr>
+</table></div>
+<div class="panel" style="margin-bottom:10px"><h3>T + 3 day(s)</h3><table class="heat"><tr><th class="corner">IV \ spot</th>
+<th>-5%</th>
+<th>-4%</th>
+<th>-3%</th>
+<th>-2%</th>
+<th>-1%</th>
+<th>+0%</th>
+<th>+1%</th>
+<th>+2%</th>
+<th>+3%</th>
+<th>+4%</th>
+<th>+5%</th>
+</tr>
+<tr><th class="l">-10 pts</th>
+<td style="background:rgba(205,44,44,0.61)">−₹2.8L</td>
+<td style="background:rgba(205,44,44,0.38)">−₹1.5L</td>
+<td style="background:rgba(205,44,44,0.20)">−₹46k</td>
+<td style="background:rgba(205,44,44,0.13)">−₹3k</td>
+<td style="background:rgba(22,140,74,0.15)">₹16k</td>
+<td style="background:rgba(22,140,74,0.18)">₹34k</td>
+<td style="background:rgba(22,140,74,0.21)">₹52k</td>
+<td style="background:rgba(22,140,74,0.15)">₹16k</td>
+<td style="background:rgba(205,44,44,0.25)">−₹74k</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.56)">−₹2.6L</td>
+</tr>
+<tr><th class="l">-5 pts</th>
+<td style="background:rgba(205,44,44,0.61)">−₹2.8L</td>
+<td style="background:rgba(205,44,44,0.40)">−₹1.6L</td>
+<td style="background:rgba(205,44,44,0.24)">−₹71k</td>
+<td style="background:rgba(205,44,44,0.15)">−₹15k</td>
+<td style="background:rgba(22,140,74,0.14)">₹14k</td>
+<td style="background:rgba(22,140,74,0.17)">₹32k</td>
+<td style="background:rgba(22,140,74,0.18)">₹34k</td>
+<td style="background:rgba(205,44,44,0.12)">−₹2k</td>
+<td style="background:rgba(205,44,44,0.25)">−₹77k</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.56)">−₹2.6L</td>
+</tr>
+<tr><th class="l">+0 pts</th>
+<td style="background:rgba(205,44,44,0.62)">−₹2.9L</td>
+<td style="background:rgba(205,44,44,0.43)">−₹1.8L</td>
+<td style="background:rgba(205,44,44,0.29)">−₹96k</td>
+<td style="background:rgba(205,44,44,0.18)">−₹35k</td>
+<td style="background:rgba(22,140,74,0.12)">₹2k</td>
+<td style="background:rgba(22,140,74,0.15)">₹17k</td>
+<td style="background:rgba(22,140,74,0.14)">₹10k</td>
+<td style="background:rgba(205,44,44,0.17)">−₹26k</td>
+<td style="background:rgba(205,44,44,0.27)">−₹89k</td>
+<td style="background:rgba(205,44,44,0.41)">−₹1.7L</td>
+<td style="background:rgba(205,44,44,0.57)">−₹2.6L</td>
+</tr>
+<tr><th class="l">+5 pts</th>
+<td style="background:rgba(205,44,44,0.65)">−₹3.1L</td>
+<td style="background:rgba(205,44,44,0.47)">−₹2.0L</td>
+<td style="background:rgba(205,44,44,0.33)">−₹1.2L</td>
+<td style="background:rgba(205,44,44,0.23)">−₹61k</td>
+<td style="background:rgba(205,44,44,0.16)">−₹23k</td>
+<td style="background:rgba(205,44,44,0.13)">−₹9k</td>
+<td style="background:rgba(205,44,44,0.15)">−₹19k</td>
+<td style="background:rgba(205,44,44,0.21)">−₹53k</td>
+<td style="background:rgba(205,44,44,0.31)">−₹1.1L</td>
+<td style="background:rgba(205,44,44,0.43)">−₹1.8L</td>
+<td style="background:rgba(205,44,44,0.57)">−₹2.6L</td>
+</tr>
+<tr><th class="l">+10 pts</th>
+<td style="background:rgba(205,44,44,0.68)">−₹3.2L</td>
+<td style="background:rgba(205,44,44,0.51)">−₹2.3L</td>
+<td style="background:rgba(205,44,44,0.38)">−₹1.5L</td>
+<td style="background:rgba(205,44,44,0.28)">−₹93k</td>
+<td style="background:rgba(205,44,44,0.22)">−₹56k</td>
+<td style="background:rgba(205,44,44,0.19)">−₹43k</td>
+<td style="background:rgba(205,44,44,0.21)">−₹52k</td>
+<td style="background:rgba(205,44,44,0.26)">−₹82k</td>
+<td style="background:rgba(205,44,44,0.35)">−₹1.3L</td>
+<td style="background:rgba(205,44,44,0.46)">−₹2.0L</td>
+<td style="background:rgba(205,44,44,0.59)">−₹2.7L</td>
+</tr>
+</table></div>
+<h2>Rough margin approximation (illustrative, SPAN-like; NOT exchange SPAN)</h2><div class="panel"><table><tr><th class="l">Underlying</th><th>Price scan</th><th>Vol scan</th><th>Scan risk (worst loss)</th><th class="l">Worst scenario</th><th>Exposure %</th><th>Exposure</th><th>Total</th></tr>
+<tr><td class="l">NIFTY</td><td>±6%</td><td>±4 pts</td><td>₹4,23,784</td><td class="l">spot -6.0%, IV +4 pts, weight 1</td><td>2%</td><td>₹4,77,945</td><td><b>₹9,01,729</b></td></tr>
+</table><p class="legend">* Illustrative parameters. Real NSE Clearing margins use SPAN risk-parameter files, short-option minimums, spread credits and broker add-ons. Use this only to compare structures, never to size real capital.</p></div>
+<h2>Positions</h2><div class="panel"><table><tr><th class="l">Leg</th><th>Units</th><th>Entry</th><th>Model</th><th>IV %</th><th>MTM P&amp;L</th><th>Delta (units)</th><th>Vega ₹/pt</th><th>Theta ₹/day</th></tr>
+<tr><td class="l">SELL NIFTY 2026-11-24 24900 CE x6</td><td>-450</td><td>42.00</td><td>59.08</td><td>12.80</td><td class="neg">−₹7,685</td><td>-100.3</td><td>−₹4,870</td><td>₹4,249</td></tr>
+<tr><td class="l">SELL NIFTY 2026-11-24 23800 PE x6</td><td>-450</td><td>31.00</td><td>18.56</td><td>14.60</td><td class="pos">₹5,600</td><td>+34.7</td><td>−₹2,361</td><td>₹2,029</td></tr>
+<tr><td class="l">BUY NIFTY 2026-11-24 FUT x1</td><td>+75</td><td>24455.00</td><td>24538.49</td><td>-</td><td class="pos">₹6,262</td><td>+75.1</td><td>₹0</td><td>₹0</td></tr>
+</table><p class="legend">† IV solved from the supplied last traded price. Model: Black-Scholes-Merton (European), continuous dividend yield, calendar-day time.</p></div>
+<footer>Generated by riskdash from positions.csv. Synthetic, fictional positions and market data for demonstration only. Lot sizes, expiries and margin parameters are illustrative. Not investment advice and not the author&#x27;s trading results.</footer>
+</div></body></html>

@@ -1,0 +1,4 @@
+underlying,type,strike,expiry,qty_lots,lot_size,entry_price,side,iv,ltp
+NIFTY,CE,24900,2026-11-24,6,75,42.00,SELL,12.8,
+NIFTY,PE,23800,2026-11-24,6,75,31.00,SELL,14.6,
+NIFTY,FUT,,2026-11-24,1,75,24455.00,BUY,,

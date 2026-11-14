@@ -1,0 +1,9 @@
+{
+  "notes": "SYNTHETIC snapshot. Spot has rallied towards the short call since entry. All values fictional; lot size 35 and expiry illustrative only.",
+  "valuation_date": "2026-11-16",
+  "risk_free_rate": 0.065,
+  "india_vix": 17.8,
+  "underlyings": {
+    "BANKNIFTY": {"spot": 53100.0, "dividend_yield": 0.010, "kind": "index"}
+  }
+}

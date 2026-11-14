@@ -1,0 +1,9 @@
+{
+  "notes": "SYNTHETIC snapshot. Spot, IVs, VIX and rates are fictional. Lot size 75 and the 2026-11-24 expiry are illustrative only.",
+  "valuation_date": "2026-11-16",
+  "risk_free_rate": 0.065,
+  "india_vix": 13.4,
+  "underlyings": {
+    "NIFTY": {"spot": 24510.0, "dividend_yield": 0.012, "kind": "index"}
+  }
+}
